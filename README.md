@@ -80,5 +80,8 @@
 
 ## 개발 스택
 - **백엔드**: Spring Boot
-- **데이터베이스**: MySQL 또는 PostgreSQL
+- **데이터베이스**: MySQL 또는 H2
 - **인증**: JWT(Json Web Token)
+
+## 프론트엔드
+- Swagger 혹은 PostMan으로 대체
