@@ -1,13 +1,14 @@
 package com.Todo.service;
 
+import com.Todo.domain.Priority;
 import com.Todo.domain.Todo;
 import com.Todo.domain.User;
 import com.Todo.dto.request.TodoCreateRequest;
-import com.Todo.dto.request.TodoDeleteRequest;
 import com.Todo.dto.request.TodoModifyRequest;
 import com.Todo.dto.response.TodoCreateResponse;
 import com.Todo.dto.response.TodoDeleteResponse;
 import com.Todo.dto.response.TodoModifyResponse;
+import com.Todo.dto.response.TodoResponse;
 import com.Todo.exception.ErrorCode;
 import com.Todo.exception.TodoException;
 import com.Todo.repository.TodoRepository;
@@ -16,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -36,12 +39,67 @@ public class TodoService {
         return TodoCreateResponse.fromEntity(todo);
     }
 
+    public List<TodoResponse> findAllTodo(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new TodoException(ErrorCode.USER_NOTFOUND, String.format("%s is not found", username)));
+
+        log.info("[TodoService findAllTodo] findAll todo by user: {}", user.getUsername());
+
+
+        return todoRepository.findAllByUser_Username(username).stream().map(TodoResponse::fromEntity).toList();
+    }
+
+    public TodoResponse findById(Long id, String username) {
+        Todo todo = todoRepository.findById(id)
+                .orElseThrow(() -> new TodoException(ErrorCode.TODO_NOTFOUND, String.format("todo id: %s is not found", id)));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new TodoException(ErrorCode.USER_NOTFOUND, String.format("%s is not found", username)));
+        log.info("[TodoService findById] findbyid by user: {} id: {}", user.getUsername(),id);
+
+        return TodoResponse.fromEntity(todo);
+    }
+
+    public List<TodoResponse> findTodoByUsernameOrderByDueDateAsc(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new TodoException(ErrorCode.USER_NOTFOUND, String.format("%s is not found", username)));
+
+        log.info("[TodoService findTodoByUsernameOrderByDueDateAs] by user: {}", user.getUsername());
+
+        return todoRepository.findTodoByUsernameOrderByDueDateAsc(username).stream().map(TodoResponse::fromEntity).toList();
+    }
+
+    public List<TodoResponse> findTodoByUsernameAndPriority(String username, String priority) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new TodoException(ErrorCode.USER_NOTFOUND, String.format("%s is not found", username)));
+
+        log.info("[TodoService findTodoByUsernameAndPriority] by user: {}", user.getUsername());
+
+        Priority p;
+        try{
+            p = Priority.valueOf(priority);
+        } catch (IllegalArgumentException e){
+            log.error("[TodoService findTodoByUsernameAndPriority] Invalid priority: {}", priority);
+            throw new TodoException(ErrorCode.PRIORITY_NOT_FOUND, String.format("%s is not found", priority));
+        }
+
+        return todoRepository.findTodoByUsernameAndPriority(username,priority).stream().map(TodoResponse::fromEntity).toList();
+    }
+
+    public List<TodoResponse> findTodoByUsernameOrderByPriorityDesc(String username){
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new TodoException(ErrorCode.USER_NOTFOUND, String.format("%s is not found", username)));
+
+        log.info("[TodoService findTodoByUsernameOrderByPriorityDesc] by user: {}", user.getUsername());
+
+        return todoRepository.findTodoByUsernameOrderByPriorityDesc(username).stream().map(TodoResponse::fromEntity).toList();
+    }
+
     @Transactional
     public TodoModifyResponse modifyTodo(TodoModifyRequest request,Long todoId, String username) {
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new TodoException(ErrorCode.TODO_NOTFOUND, String.format("todo id: %s is not found", todoId)));
         if (!todo.getUser().getUsername().equals(username)) {
-            throw new TodoException(ErrorCode.INVALUD_USER, String.format("%s is invalid",username));
+            throw new TodoException(ErrorCode.INVALID_USER, String.format("%s is invalid",username));
         }
 
         todo.setTitle(request.getTitle());
@@ -60,7 +118,7 @@ public class TodoService {
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new TodoException(ErrorCode.TODO_NOTFOUND, String.format("todo id: %s is not found", todoId)));
         if (!todo.getUser().getUsername().equals(username)) {
-            throw new TodoException(ErrorCode.INVALUD_USER, String.format("%s is invalid", username));
+            throw new TodoException(ErrorCode.INVALID_USER, String.format("%s is invalid", username));
         }
 
         todoRepository.delete(todo);

@@ -26,26 +26,42 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        //request 에서 token 얻기
-        final String token = getTokenFromRequest(request);
 
-        if (token == null) {
-            log.error("token is null");
+        if (request.getRequestURI().startsWith("/api")) {
+            if(request.getRequestURI().startsWith("/api/user")){
+                filterChain.doFilter(request, response);
+                return;
+            }
+            else { //인증을 요구하는 api
+                //request 에서 token 얻기
+                final String token = getTokenFromRequest(request);
+
+                if (token == null) {
+                    log.error("token is null");
+                    return;
+                }
+
+                if (JwtUtil.isExpired(token,key)) {
+                    log.error("token is expired");
+                    return;
+                }
+
+                String username = JwtUtil.getUsername(token, key);
+                UserDetails userDetails = userDetailService.loadUserByUsername(username);
+
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                filterChain.doFilter(request, response);
+            }
+        }
+        else {
+            filterChain.doFilter(request, response);
             return;
         }
 
-        if (JwtUtil.isExpired(token,key)) {
-            log.error("token is expired");
-            return;
-        }
 
-        String username = JwtUtil.getUsername(token, key);
-        UserDetails userDetails = userDetailService.loadUserByUsername(username);
 
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        filterChain.doFilter(request, response);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

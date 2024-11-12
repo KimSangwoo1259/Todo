@@ -19,5 +19,6 @@ public class Tag {
     private String name;
 
     @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "todo_id")
     private Todo todo;
 }

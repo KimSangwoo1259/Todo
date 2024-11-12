@@ -12,7 +12,8 @@ public enum ErrorCode {
     USER_NOTFOUND(HttpStatus.NOT_FOUND, "User not found"),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "Invalid Password"),
     TODO_NOTFOUND(HttpStatus.NOT_FOUND, "Todo not found"),
-    INVALUD_USER(HttpStatus.UNAUTHORIZED, "Invalid User"),
+    INVALID_USER(HttpStatus.UNAUTHORIZED, "Invalid User"),
+    PRIORITY_NOT_FOUND(HttpStatus.NOT_FOUND, "Priority not found"),
     ;
 
     private HttpStatus httpStatus;
