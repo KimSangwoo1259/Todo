@@ -56,16 +56,17 @@ public class Todo {
     @JoinColumn(name = "user_id")
     private User user;
 
+    private Todo(String title, String description, LocalDateTime dueDate, Priority priority, User user){
+        this.title = title;
+        this.description = description;
+        this.dueDate = dueDate;
+        this.priority = priority;
+        this.user = user;
+    }
+
 
     public static Todo of(String title, String description, LocalDateTime dueDate, Priority priority, User user) {
-        Todo todo = new Todo();
-        todo.title = title;
-        todo.description = description;
-        todo.dueDate = dueDate;
-        todo.priority = priority;
-        todo.user = user;
-
-        return todo;
+        return new Todo(title, description, dueDate, priority, user);
     }
 
 

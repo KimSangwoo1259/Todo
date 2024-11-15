@@ -3,6 +3,7 @@ package com.Todo.service;
 import com.Todo.domain.Priority;
 import com.Todo.domain.Todo;
 import com.Todo.domain.User;
+import com.Todo.dto.request.TagCreateRequest;
 import com.Todo.dto.request.TodoCreateRequest;
 import com.Todo.dto.request.TodoModifyRequest;
 import com.Todo.dto.response.TodoCreateResponse;
@@ -11,6 +12,7 @@ import com.Todo.dto.response.TodoModifyResponse;
 import com.Todo.dto.response.TodoResponse;
 import com.Todo.exception.ErrorCode;
 import com.Todo.exception.TodoException;
+import com.Todo.repository.TagRepository;
 import com.Todo.repository.TodoRepository;
 import com.Todo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class TodoService {
 
     private final UserRepository userRepository;
     private final TodoRepository todoRepository;
+    private final TagService tagService;
 
     @Transactional
     public TodoCreateResponse createTodo(TodoCreateRequest request, String username) {
@@ -35,6 +38,11 @@ public class TodoService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new TodoException(ErrorCode.USER_NOTFOUND, String.format("%s is not found", username)));
         Todo todo = todoRepository.save(Todo.of(request.getTitle(), request.getDescription(), request.getDueDate(), request.getPriority(), user));
+        List<String> tags = request.getTags();
+        for (String tag : tags) {
+            tagService.createTag(new TagCreateRequest(tag),todo.getId(), username);
+        }
+
         log.info("[TodoService createTodo] todo created by user: {}", user.getUsername());
         return TodoCreateResponse.fromEntity(todo);
     }

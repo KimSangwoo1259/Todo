@@ -1,7 +1,6 @@
 package com.Todo.config.filter;
 
 import com.Todo.service.CustomUserDetailService;
-import com.Todo.service.UserService;
 import com.Todo.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

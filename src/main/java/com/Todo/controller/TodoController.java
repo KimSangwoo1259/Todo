@@ -44,7 +44,7 @@ public class TodoController {
     }
 
     @GetMapping("/{todoId}")
-    public Response<TodoResponse> findTodoById(Authentication authentication, @PathVariable long todoId) {
+    public Response<TodoResponse> findTodoById(Authentication authentication, @PathVariable Long todoId) {
         String username = authentication.getName();
         log.info("[TodoController findTodoById] try get find todo username: {}", username);
         return Response.success(todoService.findById(todoId, username));
