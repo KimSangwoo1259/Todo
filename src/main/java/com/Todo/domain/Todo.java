@@ -17,7 +17,7 @@ import static jakarta.persistence.FetchType.LAZY;
 
 @Getter
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Todo {
 
